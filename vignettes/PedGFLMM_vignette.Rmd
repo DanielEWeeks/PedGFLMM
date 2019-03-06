@@ -40,7 +40,7 @@ The package is written in R language. To install, proceed as follows:
 
 Tools -> Install Packages 
 
-and set `Install from:` to `Package Archive File` and then select the `PedGFLMM_1.0.0.tar.gz` file.
+and set `Install from:` to `Package Archive File` and then select the `PedGFLMM_1.0.0.tar.gz` file in the `Package archive` file name box.
 
 Alternatively, proceed as follows:
 
@@ -229,29 +229,29 @@ Mega2PedGFLMM(genes = "CEP104")
 
 # Explanation of the Results and Warnings 
 
-As shown above, our program outputs the p-value based on likelihood ratio test (LRT). The LRT is conservative and has good power performance. 
+As shown above, our program outputs the $p$-value based on likelihood ratio test (LRT). The LRT is conservative and has good power performance. 
 
 # Suggestions and Parameters for Real Data Analysis 
 
 In this documentation, we present three R functions to perform gene-based association analysis of dichotomous traits using family data. The two PedGFLMM functions, 'PedGFLMM\_fixed\_model.R' and 'PedGFLMM\_beta\_smooth\_only.R', usually provide very similar results. In practice, one may use one of them for data analysis. We suggest to use PedGFLMM\_fixed\_model by either B-spline or Fourier spline basis functions and report the $p$-values of LRT. If the number of SNPs is not very big, we suggest the following parameters for a data analysis:
 
-```
-order  =  4
-bbasis = 10
-gbasis = 10
-fbasis = 11
-gfasis = 11
-```
+First, set `order = 4`.
 
-If the number of SNPs is large, one should try
-```
-order  =  4
-bbasis = 15
-gbasis = 15
-fbasis = 16
-gfasis = 16
-```
-or even bigger numbers. The point is that the parameters should be large enough to sufficiently expand information of the genetic data, but can not be too large to decrease the power.
+For a B-spline basis, set `beta_basis = 10` and `geno_basis = 10`.
+
+For a Fourier spline basis, set `beta_basis = 11` and `geno_basis = 11`.
+
+
+If the number of SNPs is large, one should try `order = 4` and:
+
+For a B-spline basis, set `beta_basis = 15` and `geno_basis = 15`.
+
+For a Fourier spline basis, set `beta_basis = 16` and `geno_basis = 16`.
+
+
+It may be necessary to set `beta_basis` and `geno_basis` to even larger numbers. The point is that the parameters should be large enough to sufficiently expand information of the genetic data, but can not be too large to decrease the power.
+
+Note if an even number is specified for the basis of the Fourier spline basis function, it is rounded up to the nearest odd integer. 
 
 #  References
 

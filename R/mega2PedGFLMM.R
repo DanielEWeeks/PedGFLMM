@@ -21,7 +21,7 @@
 #' @export
 #'
 #' @note
-#'  \emph{init_PedGFLMM} sets up the schaidPed and pedPer data frames that are used later in the \emph{DoPedGFLMM} calculation.
+#'  \emph{init_PedGFLMM} sets up the schaidPed and pedPer data frames that are used later in the \emph{DOPedGFLMM} calculation.
 #'  In addition, it initializes a matrix to aid
 #'   in translating a genotype allele matrix to a genotype count matrix.
 #'
@@ -77,7 +77,7 @@ init_PedGFLMM = function (db = NULL, verbose = FALSE, traitname = "default") {
 #' Execute the PedGFLMM_beta_smooth_only function on the first \emph{gs} default gene transcript ranges (gs = 1:100).
 #'  Update the \emph{envir$PedGFLMM_results} data frame with the results.
 #"
-#' @param gs a subrange of the default transcript ranges over which to calculate the \emph{DoPedGFLMM} function.
+#' @param gs a subrange of the default transcript ranges over which to calculate the \emph{DOPedGFLMM} function.
 #'
 #' @param genes a list of genes over which to calculate the \emph{DOPedGFLMM} function.
 #'  The value, "*", means use all the transcripts in the selected Bioconductor database.
@@ -115,7 +115,7 @@ Mega2PedGFLMM = function (gs = 1:100, genes = NULL, envir = ENV) {
 #' @description
 #'  First, ignore call backs that have less than two polymorphic markers.  Second, convert the genotypesraw()
 #'  patterns of 0x10001, 0x10002 (or 0x20001), 0x20002, 0 from the genotype matrix
-#'  to the numbers 0, 1, 2, 0 for each marker. (Reverse, the order iff allele "1" has the
+#'  to the numbers 0, 1, 2, 0 for each marker. (Reverse, the order if allele "1" has the
 #'  minor allele frequency.)  Next, prepend the pedigree and person columns of the family data
 #'  to this modified genotype matrix.  Finally, invoke \code{PedGFLMM} with the family data and
 #'  genotype matrix to compute the \code{PedGFLMM_beta_smooth_only} statistics.  Save the p-values for each

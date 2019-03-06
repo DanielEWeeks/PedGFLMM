@@ -7,7 +7,7 @@
 Mega2PedGFLMM(gs = 1:100, genes = NULL, envir = ENV)
 }
 \arguments{
-\item{gs}{a subrange of the default transcript ranges over which to calculate the \emph{DoPedGFLMM} function.}
+\item{gs}{a subrange of the default transcript ranges over which to calculate the \emph{DOPedGFLMM} function.}
 
 \item{genes}{a list of genes over which to calculate the \emph{DOPedGFLMM} function.
 The value, "*", means use all the transcripts in the selected Bioconductor database.

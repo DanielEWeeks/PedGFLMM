@@ -21,7 +21,7 @@ This value is saved in the returned environment.}
 This populates the \bold{R} data frames from the specified \bold{Mega2} SQLite database.
 }
 \note{
-\emph{init_PedGFLMM} sets up the schaidPed and pedPer data frames that are used later in the \emph{DoPedGFLMM} calculation.
+\emph{init_PedGFLMM} sets up the schaidPed and pedPer data frames that are used later in the \emph{DOPedGFLMM} calculation.
  In addition, it initializes a matrix to aid
   in translating a genotype allele matrix to a genotype count matrix.
 
