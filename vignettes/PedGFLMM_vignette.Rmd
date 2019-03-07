@@ -1,6 +1,6 @@
 ---
 title: "PedGFLMM Vignette"
-author: "Yingda Jiang, Chi-yang Chiu, Daniel E. Weeks, Ruzong Fan"
+author: "Yingda Jiang, Chi-Yang Chiu, Daniel E. Weeks, Ruzong Fan"
 date: "`r format(Sys.time(), '%B %d, %Y')`"
 output: 
   rmarkdown::html_vignette:
