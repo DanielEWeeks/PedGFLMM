@@ -4,8 +4,8 @@
 \alias{PedGFLMM_fixed_model}
 \title{PedGFLMM_fixed_model}
 \usage{
-PedGFLMM_fixed_model(ped, geno, covariate, pos, order, beta_basis, geno_basis,
-  base = "bspline", distribution = "binomial", Wald = FALSE)
+PedGFLMM_fixed_model(ped, geno, covariate = NULL, pos, order, beta_basis,
+  geno_basis, base = "bspline", Wald = FALSE)
 }
 \arguments{
 \item{ped}{A data frame containing the pedigree information with the following columns:
@@ -21,7 +21,7 @@ PedGFLMM_fixed_model(ped, geno, covariate, pos, order, beta_basis, geno_basis,
 
 \item{geno}{A data frame containing the genotype information.  This is a matrix with genotypes for subjects (rows) at each variant position (columns). The first two columns are required to be named “ped” and “person”, which are used to match subjects to their data in the pedigree data.frame. The genotypes are coded as 0, 1, 2 for autosomal markers (typically a count of the number of the minor alleles).}
 
-\item{covariate}{A data frame containing the covariate information. The first two columns are required to be named “ped” and “person”, which are used to match subjects to their data in the pedigree data frame.}
+\item{covariate}{A data frame containing the covariate information. The first two columns are required to be named “ped” and “person”, which are used to match subjects to their data in the pedigree data frame. This is optional and the default "covariate = NULL" is for the case when the covariate matrix is not provided.}
 
 \item{pos}{Position of the markers in base pairs.}
 
@@ -32,8 +32,6 @@ PedGFLMM_fixed_model(ped, geno, covariate, pos, order, beta_basis, geno_basis,
 \item{geno_basis}{The number of basis functions used to estimate the genetic variant functions.}
 
 \item{base}{Can be either 'bspline' or 'fspline'.}
-
-\item{distribution}{This is set to 'binomial'; only binomial is supported.}
 
 \item{Wald}{If Wald is set to true, return the Wald p-value in addition to the LRT p-value (Default: Wald = FALSE).}
 }
@@ -59,13 +57,23 @@ order  =   4
 
 fixed_bsp=PedGFLMM_fixed_model(ped = Ped, geno = as.matrix(geno), pos = snpPos$pos,
     order = order, beta_basis=betabasis_Bsp, geno_basis = genobasis_Bsp,
-    covariate = as.matrix(cov), base = "bspline", distribution = 'binomial')
+    covariate = as.matrix(cov), base = "bspline")
 fixed_bsp
 
 fixed_fsp=PedGFLMM_fixed_model(ped = Ped, geno = as.matrix(geno), pos = snpPos$pos,
     order = order, beta_basis=betabasis_Fsp, geno_basis = genobasis_Fsp,
-    covariate = as.matrix(cov), base = "fspline", distribution = 'binomial')
+    covariate = as.matrix(cov), base = "fspline")
 fixed_fsp
+
+fixed_bsp_no_cov=PedGFLMM_fixed_model(ped = Ped, geno = as.matrix(geno), pos = snpPos$pos,
+    order = order, beta_basis=betabasis_Bsp, geno_basis = genobasis_Bsp,
+    covariate = NULL, base = "bspline")
+fixed_bsp_no_cov
+
+fixed_fsp_no_cov=PedGFLMM_fixed_model(ped = Ped, geno = as.matrix(geno), pos = snpPos$pos,
+    order = order, beta_basis=betabasis_Fsp, geno_basis = genobasis_Fsp,
+    covariate = NULL, base = "fspline")
+fixed_fsp_no_cov
 }
 \references{
 Chiu CY, Yuan F, Zhang BS, Yuan A, Li X, Fang HB, Lange K, Weeks DE, Wilson AF, Bailey-Wilson JE, Lakhal-Chaieb ML, Cook RJ, McMahon FJ, Amos CI, Xiong MM, and Fan RZ (2019) Pedigree-based linear mixed models for association analysis of quantitative traits with next-generation sequencing data. Genetic Epidemiology 43(2):189-206.

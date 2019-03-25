@@ -4,8 +4,7 @@
 \alias{PedGLMM_additive_effect_model}
 \title{PedGLMM_additive_effect_model}
 \usage{
-PedGLMM_additive_effect_model(ped, geno, covariate, distribution = "binomial",
-  Wald = FALSE)
+PedGLMM_additive_effect_model(ped, geno, covariate = NULL, Wald = FALSE)
 }
 \arguments{
 \item{ped}{A data frame containing the pedigree information with the following columns:
@@ -21,9 +20,7 @@ PedGLMM_additive_effect_model(ped, geno, covariate, distribution = "binomial",
 
 \item{geno}{A data frame containing the genotype information.  This is a matrix with genotypes for subjects (rows) at each variant position (columns). The first two columns are required to be named “ped” and “person”, which are used to match subjects to their data in the pedigree data.frame. The genotypes are coded as 0, 1, 2 for autosomal markers (typically a count of the number of the minor alleles).}
 
-\item{covariate}{A data frame containing the covariate information. The first two columns are required to be named “ped” and “person”, which are used to match subjects to their data in the pedigree data frame.}
-
-\item{distribution}{This is set to 'binomial'; only binomial is supported.}
+\item{covariate}{A data frame containing the covariate information. The first two columns are required to be named “ped” and “person”, which are used to match subjects to their data in the pedigree data frame. This is optional and the default "covariate = NULL" is for the case when the covariate matrix is not provided.}
 
 \item{Wald}{If Wald is set to true, return the Wald p-value in addition to the LRT p-value (Default: Wald = FALSE).}
 }
@@ -41,9 +38,11 @@ Computes the PedGFLMM statistics under an additive effect model
 data(exampleData)
 
 add=PedGLMM_additive_effect_model(ped=Ped, geno = as.matrix(geno),
-   covariate = as.matrix(cov), distribution = 'binomial')
+    covariate = as.matrix(cov))
 add
 
+add_no_cov=PedGLMM_additive_effect_model(ped=Ped, geno = as.matrix(geno), covariate = NULL)
+add_no_cov
 }
 \references{
 Chiu CY, Yuan F, Zhang BS, Yuan A, Li X, Fang HB, Lange K, Weeks DE, Wilson AF, Bailey-Wilson JE, Lakhal-Chaieb ML, Cook RJ, McMahon FJ, Amos CI, Xiong MM, and Fan RZ (2019) Pedigree-based linear mixed models for association analysis of quantitative traits with next-generation sequencing data. Genetic Epidemiology 43(2):189-206.

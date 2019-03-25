@@ -1,3 +1,6 @@
+# Copyright 2019, University of Georgetown and University of Pittsburgh.  All Rights Reserved.
+#
+### Updated by Chi-Yang on 03/19/2019: block distribution = "binomial", make the routine work for no covariate
 ### Written by Chi-Yang Chiu and Ruzong Fan, May 2016
 ### This function use r function "pedigreemm" to fit GFLMM for pedigree data
 ### need to provide ped_list that can be created by r function "pedigree" from library "pedigreemm"
@@ -23,8 +26,7 @@
 #'   \item{trait}{trait phenotype, case-control status coded as 1 for affected and 0 for unaffected. Subjects with missing (NA) will be removed from the analysis.}
 #' }
 #' @param geno A data frame containing the genotype information.  This is a matrix with genotypes for subjects (rows) at each variant position (columns). The first two columns are required to be named “ped” and “person”, which are used to match subjects to their data in the pedigree data.frame. The genotypes are coded as 0, 1, 2 for autosomal markers (typically a count of the number of the minor alleles).
-#' @param covariate  A data frame containing the covariate information. The first two columns are required to be named “ped” and “person”, which are used to match subjects to their data in the pedigree data frame.
-#' @param distribution This is set to 'binomial'; only binomial is supported.
+#' @param covariate A data frame containing the covariate information. The first two columns are required to be named “ped” and “person”, which are used to match subjects to their data in the pedigree data frame. This is optional and the default "covariate = NULL" is for the case when the covariate matrix is not provided.
 #' @param Wald If Wald is set to true, return the Wald p-value in addition to the LRT p-value (Default: Wald = FALSE).
 #'
 #' @return A list containing the following components:
@@ -60,10 +62,12 @@
 #' data(exampleData)
 #'
 #' add=PedGLMM_additive_effect_model(ped=Ped, geno = as.matrix(geno),
-#'    covariate = as.matrix(cov), distribution = 'binomial')
+#'     covariate = as.matrix(cov))
 #' add
 #'
-PedGLMM_additive_effect_model = function(ped, geno, covariate, distribution = 'binomial', Wald = FALSE)
+#' add_no_cov=PedGLMM_additive_effect_model(ped=Ped, geno = as.matrix(geno), covariate = NULL)
+#' add_no_cov
+PedGLMM_additive_effect_model = function(ped, geno, covariate = NULL, Wald = FALSE)
   {
     length_index = dim(geno)[2]  ### added by Bingsong Zhang ###
     #### GENERATING "pedigree_list" FOR USING R FUNCTION "pedigremm"
@@ -111,10 +115,6 @@ PedGLMM_additive_effect_model = function(ped, geno, covariate, distribution = 'b
     geno = geno[,-c(1:2)]  # REMOVE THE FIRST TWO COLUMNS WHICH INCLUDE PEDIGREE ID and PERSON ID WITHIN FAMILY
     geno[is.na(geno)]=0
 
-    dimcov = ncol(covariate) - 2
-    covariate = covariate[,-c(1:2), drop = FALSE]  # REMOVE THE FIRST TWO COLUMNS WHICH INCLUDE PEDIGREE ID and PERSON ID WITHIN FAMILY
-    #covariate[is.na(covariate)] = 0
-
     dqr     = qr(geno)
     index   = dqr$pivot[1:dqr$rank]
     if (length_index>3)                    ### added by Bingsong Zhang ###
@@ -125,31 +125,45 @@ PedGLMM_additive_effect_model = function(ped, geno, covariate, distribution = 'b
       geno= as.matrix(geno)
     }
 
+    ### Model
+    if(is.null(covariate))
+    {
+      dimcov = 0 # for Wald's test statistics
 
-    ###
-    fit     = pedigreemm( trait ~ covariate + geno + (1|ID), pedigree = list(ID = ped_list), data=ped, family = distribution)
-    fitnull = pedigreemm( trait ~ covariate + (1|ID),        pedigree = list(ID = ped_list), data=ped, family = distribution)
+      fit     = pedigreemm( trait ~ geno + (1|ID), pedigree = list(ID = ped_list), data=ped, family = 'binomial')
+      fitnull = pedigreemm( trait ~        (1|ID),        pedigree = list(ID = ped_list), data=ped, family = 'binomial')
+
+    } else
+    {
+      dimcov = ncol(covariate) - 2 # for Wald's test statistics
+      covariate = covariate[,-c(1:2), drop = FALSE]  # REMOVE THE FIRST TWO COLUMNS WHICH INCLUDE PEDIGREE ID and PERSON ID WITHIN FAMILY
+      #covariate[is.na(covariate)] = 0
+      covariate <- as.matrix(covariate)
+
+      fit     = pedigreemm( trait ~ covariate + geno + (1|ID), pedigree = list(ID = ped_list), data=ped, family = 'binomial')
+      fitnull = pedigreemm( trait ~ covariate + (1|ID),        pedigree = list(ID = ped_list), data=ped, family = 'binomial')
+    }
+
     pval = list()
-
     ### LRT
     nested_model_comparison = anova(fit, fitnull)
     pval$LRT = nested_model_comparison[2,8]
 
     ### Wald test
     if (Wald) {
-    coef_summary = summary(fit)$coefficients  # Sumary of coefficients
-    coef         = coef_summary[,1]           # Obtain MLE of all parameters from the first column
-    coef         = as.vector(coef)
+      coef_summary = summary(fit)$coefficients  # Sumary of coefficients
+      coef         = coef_summary[,1]           # Obtain MLE of all parameters from the first column
+      coef         = as.vector(coef)
 
-    n_UJ    = length(coef)-(1+dimcov)                                # Number of coefficients for basis
-    coef_UJ = coef[(2+dimcov):length(coef)]                          # Remove first 1+dimcov rows for intercept and covariate
-    covm    = vcov(fit)                                              # Covariance matrix of all parameter's MLE
-    covm_UJ = covm[(2+dimcov):length(coef),(2+dimcov):length(coef)]  # Covariance of coefficient MLE for geno
-    covm_UJ = as.matrix(covm_UJ)
+      n_UJ    = length(coef)-(1+dimcov)                                # Number of coefficients for basis
+      coef_UJ = coef[(2+dimcov):length(coef)]                          # Remove first 1+dimcov rows for intercept and covariate
+      covm    = vcov(fit)                                              # Covariance matrix of all parameter's MLE
+      covm_UJ = covm[(2+dimcov):length(coef),(2+dimcov):length(coef)]  # Covariance of coefficient MLE for geno
+      covm_UJ = as.matrix(covm_UJ)
 
-    Wald      = t(coef_UJ) %*% ginv(covm_UJ) %*% coef_UJ                # Wald's test statistic
-    pval$Wald = pchisq(as.numeric(Wald), df=ncol(geno), lower.tail=FALSE) # df = number of restrictions i.e number of coef estimates for basis function ###
+      Wald      = t(coef_UJ) %*% ginv(covm_UJ) %*% coef_UJ                # Wald's test statistic
+      pval$Wald = pchisq(as.numeric(Wald), df=ncol(geno), lower.tail=FALSE) # df = number of restrictions i.e number of coef estimates for basis function ###
     }
 
     pval
-  }
+   }

@@ -1,4 +1,6 @@
-#   This code is dervied from the 'mega2pedgene.R' file from the
+# Copyright 2019, University of Georgetown and University of Pittsburgh.  All Rights Reserved.
+#
+# This code is dervied from the 'mega2pedgene.R' file from the
 #   Mega2R package.
 #   Contributors to Mega2R: Robert V. Baron and Daniel E. Weeks.
 #
@@ -211,7 +213,7 @@ DOPedGFLMM = function(markers_arg, range_arg, envir = ENV) {
         bsmooth.Bsp <- PedGFLMM_beta_smooth_only(ped = IDped, geno = pedgeno,
                  pos = markers_arg$position[maf>0], order = order, beta_basis=betabasis_Bsp,
                  covariate = cov,
-                 base = "bspline", distribution = 'binomial')
+                 base = "bspline")
         LRT.bsm.Bsp <- bsmooth.Bsp$LRT
 #       Wald.bsmooth.Bsp <- bsmooth.Bsp$Wald
 
@@ -221,7 +223,7 @@ DOPedGFLMM = function(markers_arg, range_arg, envir = ENV) {
         bsmooth.fsp=PedGFLMM_beta_smooth_only(ped = IDped, geno = pedgeno,
                 pos = markers_arg$position[maf>0], order = order, beta_basis=betabasis_Fsp,
                 covariate = cov,
-                base = "fspline", distribution = 'binomial')
+                base = "fspline")
         LRT.bsm.fsp <- bsmooth.fsp$LRT
 #       Wald.bsm.fsp <- bsmooth.fsp$Wald
 

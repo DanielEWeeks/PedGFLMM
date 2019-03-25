@@ -24,8 +24,9 @@ library(knitr)
 opts_chunk$set(tidy.opts=list(width.cutoff=80),tidy=TRUE)
 ```
 
-# Overview
+(c) 2019, University of Georgetown and University of Pittsburgh.  All Rights Reserved. 
 
+# Overview
 This document describes our R package `PedGFLMM` which implements family-based additive generalized linear mixed models (GLMM) and generalized functional linear mixed models (GFLMM) for gene-based association testing of dichotomous traits (Jiang et al, 2019). Section 2 briefly describes the installation of the program. Section 3 describes the data formats. Section 4 explains how to run the program using one example. Section 5 offers explanation of the results and warnings to use the programs. Section 6 provides some suggestions and parameter choices for real data analysis.
 
 The theoretical basis for this program is given in our research papers in Section 7 "References" below; the primary paper describing this work is Jiang et al (2019). Please cite the references if you use our program
@@ -49,6 +50,18 @@ Alternatively, proceed as follows:
 
 3. Start up R and proceed as follows:
 
+3.1 Install the required packages
+
+This package depends on a number of packages.  These include 'Mega2R' which is available in CRAN and can be installed via the 'install.packages' command, as well as three Bioconductor packages which can be installed via the commands listed below (adjust the Bioconductor version number as needed):
+
+```
+if (!require("Mega2R")) install.packages("Mega2R") 
+if (!requireNamespace("BiocManager", quietly = TRUE)) install.packages("BiocManager")
+BiocManager::install("AnnotationDbi", version = "3.8")
+BiocManager::install("gdsfmt", version = "3.8")
+BiocManager::install("GenomeInfoDb", version = "3.8")
+```
+3.2 Install the `PedGFLMM` R package
 ```
 install.packages("path_to_file",repos = NULL, type ="source", dependencies = TRUE)
 ```
@@ -106,7 +119,7 @@ kable(head(snpPos), caption = "Table 3: The first 6 lines of the example map fil
 ```
 
 
-## The covariate file
+## The covariate file (optional)
 The covariate file contains covariates. The first two columns are required to be named 'ped' and 
 'person', which are used to match subjects to their data in the pedigree data.frame.
 
@@ -150,11 +163,14 @@ ls()
 This function carries out a region-based association test using our additive generalized linear mixed model (GLMM), as described in Jiang et al (2019).  This statistics may not be powerful when the number of genetic variants is large.
 
 ```{r}
-add=PedGLMM_additive_effect_model(ped=Ped, geno = as.matrix(geno),
-   covariate = as.matrix(cov), distribution = 'binomial')
+add=PedGLMM_additive_effect_model(ped=Ped, geno = as.matrix(geno),covariate = as.matrix(cov))
 add
 ```
-
+For the case without providing covariate,
+```{r}
+add_no_cov=PedGLMM_additive_effect_model(ped=Ped, geno = as.matrix(geno),covariate = NULL)
+add_no_cov
+```
 
 ## The PedGFLMM_beta_smooth_only function
 
@@ -164,25 +180,32 @@ The genetic effect function can be expanded using either B-spline or Fourier bas
 
 ```{r}
 betabasis_Bsp = 10
-genobasis_Bsp = 10
-
 betabasis_Fsp = 11
-genobasis_Fsp = 11
+
 order  =   4
 
 bsmooth_bsp=PedGFLMM_beta_smooth_only(ped = Ped, geno = as.matrix(geno),
    pos = snpPos$pos, order = order, beta_basis=betabasis_Bsp, covariate = as.matrix(cov),
-   base = "bspline", distribution = 'binomial')
+   base = "bspline")
 bsmooth_bsp
 
 bsmooth_fsp=PedGFLMM_beta_smooth_only(ped = Ped, geno = as.matrix(geno),
    pos = snpPos$pos, order = order, beta_basis=betabasis_Fsp, covariate = as.matrix(cov),
-   base = "fspline", distribution = 'binomial')
+   base = "fspline")
 bsmooth_fsp
 ```
 
+For the case without providing covariate,
+```{r}
 
+bsmooth_bsp_no_cov=PedGFLMM_beta_smooth_only(ped = Ped, geno = as.matrix(geno),
+   pos = snpPos$pos, order = order, beta_basis=betabasis_Bsp, covariate = NULL, base = "bspline")
+bsmooth_bsp_no_cov
 
+bsmooth_fsp_no_cov=PedGFLMM_beta_smooth_only(ped = Ped, geno = as.matrix(geno),
+   pos = snpPos$pos, order = order, beta_basis=betabasis_Fsp, covariate = NULL, base = "fspline")
+bsmooth_fsp_no_cov
+```
 
 ## The PedGFLMM_fixed_model function
 
@@ -200,16 +223,32 @@ order  =   4
 
 fixed_bsp=PedGFLMM_fixed_model(ped = Ped, geno = as.matrix(geno), pos = snpPos$pos,
     order = order, beta_basis=betabasis_Bsp, geno_basis = genobasis_Bsp,
-    covariate = as.matrix(cov), base = "bspline", distribution = 'binomial')
+    covariate = as.matrix(cov), base = "bspline")
 fixed_bsp
 
 fixed_fsp=PedGFLMM_fixed_model(ped = Ped, geno = as.matrix(geno), pos = snpPos$pos,
     order = order, beta_basis=betabasis_Fsp, geno_basis = genobasis_Fsp,
-    covariate = as.matrix(cov), base = "fspline", distribution = 'binomial')
+    covariate = as.matrix(cov), base = "fspline")
 fixed_fsp
 ```
 
+For the case without providing covariate,
+```{r}
+betabasis_Bsp = 10
+genobasis_Bsp = 10
 
+betabasis_Fsp = 11
+genobasis_Fsp = 11
+order  =   4
+
+fixed_bsp_no_cov=PedGFLMM_fixed_model(ped = Ped, geno = as.matrix(geno), pos = snpPos$pos,
+    order = order, beta_basis=betabasis_Bsp, geno_basis = genobasis_Bsp, covariate = NULL, base = "bspline")
+fixed_bsp_no_cov
+
+fixed_fsp_no_cov=PedGFLMM_fixed_model(ped = Ped, geno = as.matrix(geno), pos = snpPos$pos,
+    order = order, beta_basis=betabasis_Fsp, geno_basis = genobasis_Fsp, covariate = NULL, base = "fspline")
+fixed_fsp_no_cov
+```
 ## The Mega2PedGFLMM function
 
 The `Mega2PedGFLMM` function illustrates how to use functions from the `Mega2R` R package (Baron et al, 2018) to easily loop through genes, computing the `PedGFLMM_beta_smooth_only` statistics for each gene.  
@@ -269,6 +308,9 @@ Jiang YD, Chiu CY, Yan Q, Chen W, Gorin MB, Conley YP, Lakhal-Chaieb ML, Cook RJ
 
 Schaid DJ, McDonnell SK, Sinnwell JP, and Thibodeau SN (2013) Multiple genetic variant association testing by collapsing and kernel methods with pedigree or population structured data. _Genetic Epidemiology_ __37__:409-418.
 
+# Copyright Information
+
+(c) 2019, University of Georgetown and University of Pittsburgh.  All Rights Reserved. 
 
 # Session Information
 

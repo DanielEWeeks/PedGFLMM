@@ -4,8 +4,8 @@
 \alias{PedGFLMM_beta_smooth_only}
 \title{PedGFLMM_beta_smooth_only}
 \usage{
-PedGFLMM_beta_smooth_only(ped, geno, covariate, pos, order, beta_basis,
-  base = "bspline", distribution = "binomial", Wald = FALSE)
+PedGFLMM_beta_smooth_only(ped, geno, covariate = NULL, pos, order, beta_basis,
+  base = "bspline", Wald = FALSE)
 }
 \arguments{
 \item{ped}{A data frame containing the pedigree information with the following columns:
@@ -21,7 +21,7 @@ PedGFLMM_beta_smooth_only(ped, geno, covariate, pos, order, beta_basis,
 
 \item{geno}{A data frame containing the genotype information.  This is a matrix with genotypes for subjects (rows) at each variant position (columns). The first two columns are required to be named “ped” and “person”, which are used to match subjects to their data in the pedigree data.frame. The genotypes are coded as 0, 1, 2 for autosomal markers (typically a count of the number of the minor alleles).}
 
-\item{covariate}{A data frame containing the covariate information. The first two columns are required to be named “ped” and “person”, which are used to match subjects to their data in the pedigree data frame.}
+\item{covariate}{A data frame containing the covariate information. The first two columns are required to be named “ped” and “person”, which are used to match subjects to their data in the pedigree data frame. This is optional and the default "covariate = NULL" is for the case when the covariate matrix is not provided.}
 
 \item{pos}{Position of the markers in base pairs.}
 
@@ -30,8 +30,6 @@ PedGFLMM_beta_smooth_only(ped, geno, covariate, pos, order, beta_basis,
 \item{beta_basis}{The number of basis functions used to estimate the genetic effect function.}
 
 \item{base}{Can be either 'bspline' or 'fspline'.}
-
-\item{distribution}{This is set to 'binomial'; only binomial is supported.}
 
 \item{Wald}{If Wald is set to true, return the Wald p-value in addition to the LRT p-value (Default: Wald = FALSE).}
 }
@@ -49,22 +47,28 @@ Computes the PedGFLMM statistics under the beta smooth only model.
 data(exampleData)
 
 betabasis_Bsp = 10
-genobasis_Bsp = 10
-
 betabasis_Fsp = 11
-genobasis_Fsp = 11
 order  =   4
 
 bsmooth_bsp=PedGFLMM_beta_smooth_only(ped = Ped, geno = as.matrix(geno),
    pos = snpPos$pos, order = order, beta_basis=betabasis_Bsp, covariate = as.matrix(cov),
-   base = "bspline", distribution = 'binomial')
+   base = "bspline")
 bsmooth_bsp
 
 bsmooth_fsp=PedGFLMM_beta_smooth_only(ped = Ped, geno = as.matrix(geno),
    pos = snpPos$pos, order = order, beta_basis=betabasis_Fsp, covariate = as.matrix(cov),
-   base = "fspline", distribution = 'binomial')
+   base = "fspline")
 bsmooth_fsp
 
+bsmooth_bsp_no_cov=PedGFLMM_beta_smooth_only(ped = Ped, geno = as.matrix(geno),
+   pos = snpPos$pos, order = order, beta_basis=betabasis_Bsp, covariate = NULL,
+   base = "bspline")
+bsmooth_bsp_no_cov
+
+bsmooth_fsp_no_cov=PedGFLMM_beta_smooth_only(ped = Ped, geno = as.matrix(geno),
+   pos = snpPos$pos, order = order, beta_basis=betabasis_Fsp, covariate = NULL,
+   base = "fspline")
+bsmooth_fsp_no_cov
 }
 \references{
 Chiu CY, Yuan F, Zhang BS, Yuan A, Li X, Fang HB, Lange K, Weeks DE, Wilson AF, Bailey-Wilson JE, Lakhal-Chaieb ML, Cook RJ, McMahon FJ, Amos CI, Xiong MM, and Fan RZ (2019) Pedigree-based linear mixed models for association analysis of quantitative traits with next-generation sequencing data. Genetic Epidemiology 43(2):189-206.

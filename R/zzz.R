@@ -1,4 +1,5 @@
-
+# Copyright 2019, University of Georgetown and University of Pittsburgh.  All Rights Reserved.
+#
 .onLoad <- function(libname = find.package("PedGFLMM"), pkgname = "PedGFLMM") {
 
 
