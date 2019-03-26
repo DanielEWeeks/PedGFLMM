@@ -238,3 +238,14 @@ PedGFLMM_beta_smooth_only = function(ped, geno, covariate=NULL, pos, order, beta
 
   pval
   }
+
+#' PedGFLMM package
+#'
+#' @description This package implements family-based additive generalized linear mixed
+#' models (GLMM) and generalized functional linear mixed models (GFLMM) for
+#' gene-based association testing of dichotomous traits (Jiang et al, 2019).
+#'
+#' @author Yingda Jiang, Chi-Yang Chiu, Daniel E. Weeks, Ruzong Fan
+#' @docType package
+#' @name PedGFLMM
+NULL
