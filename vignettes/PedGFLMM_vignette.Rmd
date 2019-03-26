@@ -76,6 +76,8 @@ install_github("DanielEWeeks/PedGFLMM", build_opts = c("--no-resave-data", "--no
    build_vignettes = TRUE)
 ```
 
+Note that this vignette is available online at https://github.com/DanielEWeeks/PedGFLMM.
+
 After the `PedGFLMM` R package has been installed, you can view this vignette by issuing these commands at the R prompt:
 
 ```
