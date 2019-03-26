@@ -1,7 +1,7 @@
 PedGFLMM Vignette
 ================
 Yingda Jiang, Chi-Yang Chiu, Daniel E. Weeks, Ruzong Fan
-March 26, 2019
+
 
 -   [Overview](#overview)
 -   [Installation](#installation)
