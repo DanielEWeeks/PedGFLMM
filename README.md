@@ -35,19 +35,17 @@ Installation
 
 The package is written in R language. To install, proceed as follows:
 
-1.  Download the source archive 'PedGFLMM\_1.0.0.tar.gz' file.
-2.  Start up RStudio, and go to:
+1.  Install the `devtools` package by starting up R and issuing this command:
 
-Tools -&gt; Install Packages
+<!-- -->
 
-and set `Install from:` to `Package Archive File` and then select the `PedGFLMM_1.0.0.tar.gz` file in the `Package archive` file name box.
+    install.packages("devtools")
 
-Alternatively, proceed as follows:
+1.  Load the `devtools` library to make its commands available:
 
-1.  Download the source archive 'PedGFLMM\_1.0.0.tar.gz' file.
-2.  If you are using Windows, install the 'Rtools' R package from CRAN via this link <https://cran.r-project.org/bin/windows/Rtools/>
+<!-- -->
 
-3.  Start up R and proceed as follows:
+    library(devtools)
 
 3.1 Install the required packages
 
@@ -61,9 +59,11 @@ This package depends on a number of packages. These include 'Mega2R' which is av
 
 3.2 Install the `PedGFLMM` R package
 
-    install.packages("path_to_file",repos = NULL, type ="source", dependencies = TRUE)
+    install_github("DanielEWeeks/PedGFLMM")
 
-where `path_to_file` is represent the full path to the file ending in 'PedGFLMM\_1.0.0.tar.gz'.
+If you wish to have this vignette installed and accessible within your R help pages, use this command instead (but note that this will be slower):
+
+    install_github("DanielEWeeks/PedGFLMM", build_opts = c("--no-resave-data", "--no-manual"), build_vignettes = TRUE)
 
 After the `PedGFLMM` R package has been installed, you can view this vignette by issuing these commands at the R prompt:
 
@@ -438,4 +438,3 @@ Copyright Information
 =====================
 
 Copyright 2019, University of Georgetown and University of Pittsburgh. All Rights Reserved.
-
