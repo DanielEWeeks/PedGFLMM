@@ -66,13 +66,13 @@ BiocManager::install("GenomeInfoDb", version = "3.8")
 3.2 Install the `PedGFLMM` R package
 
 ```
-install_github("DanielEWeeks/PedGFLMM")
+install_github("DanielEWeeks/PedGFLMM/pkg")
 ```
 
 If you wish to have this vignette installed and accessible within your R help pages, use this command instead (but note that this will be slower):
 
 ```
-install_github("DanielEWeeks/PedGFLMM", build_opts = c("--no-resave-data", "--no-manual"),
+install_github("DanielEWeeks/PedGFLMM/pkg", build_opts = c("--no-resave-data", "--no-manual"),       
    build_vignettes = TRUE)
 ```
 
@@ -181,6 +181,8 @@ For the case without providing covariate,
 add_no_cov=PedGLMM_additive_effect_model(ped=Ped, geno = as.matrix(geno),covariate = NULL)
 add_no_cov
 ```
+
+As you can see from the examples above, the `PedGLMM_additive_effect_model` function had convergence problems.  If this happens, instead of using the `PedGLMM_additive_effect_model`, one can use either `PedGFLMM_beta_smooth_only` or  `PedGFLMM_fixed_model` instead. If those have convergence issues, you can try using a smaller number of basis functions with those.
 
 ## The PedGFLMM_beta_smooth_only function
 

@@ -59,11 +59,14 @@ This package depends on a number of packages. These include 'Mega2R' which is av
 
 3.2 Install the `PedGFLMM` R package
 
-    install_github("DanielEWeeks/PedGFLMM")
+    install_github("DanielEWeeks/PedGFLMM/pkg")
 
 If you wish to have this vignette installed and accessible within your R help pages, use this command instead (but note that this will be slower):
 
-    install_github("DanielEWeeks/PedGFLMM", build_opts = c("--no-resave-data", "--no-manual"), build_vignettes = TRUE)
+    install_github("DanielEWeeks/PedGFLMM/pkg", build_opts = c("--no-resave-data", "--no-manual"),       
+       build_vignettes = TRUE)
+
+Note that this vignette is available online at <https://github.com/DanielEWeeks/PedGFLMM>.
 
 After the `PedGFLMM` R package has been installed, you can view this vignette by issuing these commands at the R prompt:
 
@@ -213,6 +216,8 @@ add_no_cov
 
     ## $LRT
     ## [1] 0.2396751
+
+As you can see from the examples above, the `PedGLMM_additive_effect_model` function had convergence problems. If this happens, instead of using the `PedGLMM_additive_effect_model`, one can use either `PedGFLMM_beta_smooth_only` or `PedGFLMM_fixed_model` instead. If those have convergence issues, you can try using a smaller number of basis functions with those.
 
 The PedGFLMM\_beta\_smooth\_only function
 -----------------------------------------
