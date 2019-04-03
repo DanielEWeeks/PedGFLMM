@@ -201,7 +201,7 @@ add
     ## $LRT
     ## [1] 0.1932793
 
-For the case without providing covariate,
+For the case without covariates,
 
 ``` r
 add_no_cov = PedGLMM_additive_effect_model(ped = Ped, geno = as.matrix(geno), covariate = NULL)
@@ -217,14 +217,14 @@ add_no_cov
     ## $LRT
     ## [1] 0.2396751
 
-As you can see from the examples above, the `PedGLMM_additive_effect_model` function had convergence problems. If this happens, instead of using the `PedGLMM_additive_effect_model`, one can use either `PedGFLMM_beta_smooth_only` or `PedGFLMM_fixed_model` instead. If those have convergence issues, you can try using a smaller number of basis functions with those.
+As you can see from the examples above, the `PedGLMM_additive_effect_model` function had convergence problems. If this happens, instead of using the `PedGLMM_additive_effect_model`, one can use either `PedGFLMM_beta_smooth_only` or `PedGFLMM_fixed_model` instead.
 
 The PedGFLMM\_beta\_smooth\_only function
 -----------------------------------------
 
 This function carries out a region-based association test using our 'beta smooth only' generalized functional linear mixed model (GFLMM), where the genetic effect function is assumed to be continuous/smooth. For details, see Jiang et al (2019).
 
-The genetic effect function can be expanded using either B-spline or Fourier basis functions, and the order and number of basis functions need to be specified by the user.
+The genetic effect function can be expanded using either B-spline or Fourier basis functions, and the order and number of basis functions need to be specified by the user. For small sample size datasets, one may have problems of convergence. Then, one can use a smaller number of basis functions, e.g., `betabasis_Bsp` = 6, etc.
 
 ``` r
 betabasis_Bsp = 10
@@ -249,7 +249,7 @@ bsmooth_fsp
     ## $LRT
     ## [1] 0.4967854
 
-For the case without providing covariate,
+For the case without covariates,
 
 ``` r
 bsmooth_bsp_no_cov = PedGFLMM_beta_smooth_only(ped = Ped, geno = as.matrix(geno), 
@@ -305,7 +305,7 @@ fixed_fsp
     ## $LRT
     ## [1] 0.4967854
 
-For the case without providing covariate,
+For the case without covariates,
 
 ``` r
 betabasis_Bsp = 10
