@@ -41,7 +41,7 @@ The package is written in R language. To install, proceed as follows:
 
     install.packages("devtools")
 
-1.  Load the `devtools` library to make its commands available:
+2.  Load the `devtools` library to make its commands available:
 
 <!-- -->
 
