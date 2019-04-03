@@ -12,7 +12,7 @@ Description: Implements family-based additive generalized linear mixed models (G
 URL: https://github.com/DanielEWeeks/PedGFLMM
 BugReports: https://github.com/DanielEWeeks/PedGFLMM/issues
 License: GPL-2
-Depends: R (>= 3.3)
+Depends: R (>= 3.5)
 Imports: 
   fda, MASS, Matrix, nlme, pedigreemm, lme4, Mega2R
 Suggests:
