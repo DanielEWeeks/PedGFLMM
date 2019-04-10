@@ -35,6 +35,8 @@ This document describes our R package `PedGFLMM` which implements family-based a
 The theoretical basis for this program is given in our research papers in Section 7 "References" below; the primary paper describing this work is Jiang et al (2019). Please cite the references if you use our program
 in any published work. In case of suggestions and questions and/or problems, you can contact us via e-mail (rf740\@georgetown.edu).
 
+An HTML version of this vignette can be found at https://github.com/DanielEWeeks/PedGFLMM.
+
 # Installation
 
 The package is written in R language. To install, proceed as follows:
@@ -51,19 +53,7 @@ install.packages("devtools")
 library(devtools)
 ```
 
-3.1 Install the required packages
-
-This package depends on a number of packages.  These include 'Mega2R' which is available in CRAN and can be installed via the 'install.packages' command, as well as three Bioconductor packages which can be installed via the commands listed below (adjust the Bioconductor version number as needed):
-
-```
-if (!require("Mega2R")) install.packages("Mega2R") 
-if (!requireNamespace("BiocManager", quietly = TRUE)) install.packages("BiocManager")
-BiocManager::install("AnnotationDbi", version = "3.8")
-BiocManager::install("gdsfmt", version = "3.8")
-BiocManager::install("GenomeInfoDb", version = "3.8")
-```
-
-3.2 Install the `PedGFLMM` R package
+3. Install the `PedGFLMM` R package from the github repository via this command:
 
 ```
 install_github("DanielEWeeks/PedGFLMM/pkg")
