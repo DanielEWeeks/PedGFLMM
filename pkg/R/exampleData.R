@@ -1,4 +1,4 @@
-# Copyright 2019, University of Georgetown and University of Pittsburgh.  All Rights Reserved.
+# Copyright 2019, Georgetown University and University of Pittsburgh.  All Rights Reserved.
 #
 #' Example data for the PedGLMM package
 #'

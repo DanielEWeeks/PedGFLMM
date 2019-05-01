@@ -21,7 +21,7 @@ Yingda Jiang, Chi-Yang Chiu, Daniel E. Weeks, Ruzong Fan
 -   [References](#references)
 -   [Copyright Information](#copyright-information)
 
-Copyright 2019, University of Georgetown and University of Pittsburgh. All Rights Reserved.
+Copyright 2019, Georgetown University and University of Pittsburgh. All Rights Reserved.
 
 Overview
 ========
@@ -436,4 +436,4 @@ Schaid DJ, McDonnell SK, Sinnwell JP, and Thibodeau SN (2013) Multiple genetic v
 Copyright Information
 =====================
 
-Copyright 2019, University of Georgetown and University of Pittsburgh. All Rights Reserved.
+Copyright 2019, Georgetown University and University of Pittsburgh. All Rights Reserved.

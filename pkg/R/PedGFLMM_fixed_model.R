@@ -1,4 +1,4 @@
-# Copyright 2019, University of Georgetown and University of Pittsburgh.  All Rights Reserved.
+# Copyright 2019, Georgetown University and University of Pittsburgh.  All Rights Reserved.
 #
 ### Updated by Chi-Yang on 03/19/2019: block distribution = "binomial", make the routine work for no covariate
 ### Written by Chi-Yang Chiu and Ruzong Fan, May 2016
