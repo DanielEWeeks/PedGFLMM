@@ -1,4 +1,4 @@
-# Copyright 2019, Georgetown University and University of Pittsburgh.  All Rights Reserved.
+# Copyright 2020, Georgetown University and University of Pittsburgh.  All Rights Reserved.
 #
 ### Updated by Chi-Yang on 03/19/2019: block distribution = "binomial", make the routine work for no covariate
 ### Written by Chi-Yang Chiu and Ruzong Fan, May 2016
@@ -39,6 +39,8 @@
 #' \describe{
 #'   \item{LRT}{The p-value based on a likelihood ratio test}
 #'   \item{Wald}{The p-value based on a Wald test, returned if 'Wald' is TRUE}
+#'   \item{nbetabasis}{The number of basis functions used to estimate the genetic effect function}
+#'   \item{M_gao}{The effective number of variants in the region, as computed by M_GAO function}
 #' }
 #'
 #' @importFrom stats anova pchisq vcov
@@ -46,6 +48,7 @@
 #' @import MASS
 #' @import Matrix
 #' @import nlme
+#' @importFrom lme4 glmerControl
 #' @import pedigreemm
 #'
 #' @export
@@ -59,38 +62,36 @@
 #'
 #' Fan RZ, Wang YF, Mills JL, Carter TC, Lobach I, Wilson AF, Bailey-Wilson JE, Weeks DE, and Xiong MM (2014) Generalized functional linear models for case-control association studies. Genetic Epidemiology 38 (7):622-637.
 #'
-#' Jiang YD, Chiu CY, Yan Q, Chen W, Gorin MB, Conley YP, Lakhal-Chaieb ML, Cook RJ, Amos CI, Wilson AF, Bailey-Wilson JE, McMahon FJ, Vazquez AI, Yuan A, Zhong XG, Xiong MM, Weeks DE, and Fan RZ (2019) Gene-based association testing of dichotomous traits with generalized linear mixed models for family data.
+#' Jiang YD, Chiu CY, Yan Q, Chen W, Gorin MB, Conley YP, Lakhal-Chaieb ML, Cook RJ, Amos CI, Wilson AF, Bailey-Wilson JE, McMahon FJ, Vazquez AI, Yuan A, Zhong XG, Xiong MM, Weeks DE, and Fan RZ (2020) Gene-based association testing of dichotomous traits with generalized linear mixed models for family data.
 #'
 #' Schaid DJ, McDonnell SK, Sinnwell JP, and Thibodeau SN (2013) Multiple genetic variant association testing by collapsing and kernel methods with pedigree or population structured data. Genetic Epidemiology 37:409-418.
 #'
 #' @examples
 #' data(exampleData)
 #'
-#' betabasis_Bsp = 10
-#' betabasis_Fsp = 11
 #' order  =   4
 #'
 #' bsmooth_bsp=PedGFLMM_beta_smooth_only(ped = Ped, geno = as.matrix(geno),
-#'    pos = snpPos$pos, order = order, beta_basis=betabasis_Bsp, covariate = as.matrix(cov),
+#'    pos = snpPos$pos, order = order, covariate = as.matrix(cov),
 #'    base = "bspline")
 #' bsmooth_bsp
 #'
 #' bsmooth_fsp=PedGFLMM_beta_smooth_only(ped = Ped, geno = as.matrix(geno),
-#'    pos = snpPos$pos, order = order, beta_basis=betabasis_Fsp, covariate = as.matrix(cov),
+#'    pos = snpPos$pos, order = order, covariate = as.matrix(cov),
 #'    base = "fspline")
 #' bsmooth_fsp
 #'
 #' bsmooth_bsp_no_cov=PedGFLMM_beta_smooth_only(ped = Ped, geno = as.matrix(geno),
-#'    pos = snpPos$pos, order = order, beta_basis=betabasis_Bsp, covariate = NULL,
+#'    pos = snpPos$pos, order = order, covariate = NULL,
 #'    base = "bspline")
 #' bsmooth_bsp_no_cov
 #'
 #' bsmooth_fsp_no_cov=PedGFLMM_beta_smooth_only(ped = Ped, geno = as.matrix(geno),
-#'    pos = snpPos$pos, order = order, beta_basis=betabasis_Fsp, covariate = NULL,
+#'    pos = snpPos$pos, order = order, covariate = NULL,
 #'    base = "fspline")
 #' bsmooth_fsp_no_cov
-PedGFLMM_beta_smooth_only = function(ped, geno, covariate=NULL, pos, order, beta_basis,
-                                     base = "bspline", Wald = FALSE)
+PedGFLMM_beta_smooth_only = function(ped, geno, covariate=NULL, pos, order, beta_basis=NULL,
+                                     base = "bspline", optimizer = "bobyqa", Wald = FALSE)
 {
   ### GENERATING "pedigree_list" FOR USING R FUNCTION "pedigremm"
   dad = ped$father
@@ -120,7 +121,6 @@ PedGFLMM_beta_smooth_only = function(ped, geno, covariate=NULL, pos, order, beta
       }
     }
 
-
     dat1[dat1$ped==fam[j],]$dad_ID= dat$dad_ID
     dat1[dat1$ped==fam[j],]$mom_ID= dat$mom_ID
   }
@@ -134,29 +134,38 @@ PedGFLMM_beta_smooth_only = function(ped, geno, covariate=NULL, pos, order, beta
                    label = ped$ID)
   ped_list = pedigreemm:: pedigree(label = pede$label, sire = pede$sire, dam = pede$dam)
 
+  ### EXTRACT GENO
+  geno = geno[,-c(1:2), drop = FALSE]  # REMOVE THE FIRST TWO COLUMNS WHICH INCLUDE PEDIGREE ID and PERSON ID WITHIN FAMILY
+
+  ### number basis functions use dynamic rule
+  if(is.null(beta_basis)) {NB = dRule(geno.only = geno)}
 
   ### Create basis
   if (base ==  "bspline")
   {
-    betabasis  = create.bspline.basis(norder = order, nbasis = beta_basis)
+    nbeta_basis = ifelse(is.null(beta_basis), NB$betabasis_Bsp, beta_basis)
+    betabasis  = create.bspline.basis(norder = order, nbasis = nbeta_basis)
   } else if (base == "fspline")
   {
-    betabasis  = create.fourier.basis(c(0,1), nbasis = beta_basis)
+    nbeta_basis = ifelse(is.null(beta_basis), NB$betabasis_Fsp, beta_basis)
+    betabasis  = create.fourier.basis(c(0,1), nbasis = nbeta_basis)
   }else { }
 
-  ###
-  geno = geno[,-c(1:2), drop = FALSE]  # REMOVE THE FIRST TWO COLUMNS WHICH INCLUDE PEDIGREE ID and PERSON ID WITHIN FAMILY
-
   #### CASE WTIH NO MISSING GENO
-  if (sum(is.na(geno))==0){
+  if (sum(is.na(geno))==0)
+  {
+    #dqr     = qr(geno)
+    #index   = dqr$pivot[1:dqr$rank]
+    #geno    = as.matrix(geno[, index])
+    #pos     = pos[index]
 
-    dqr     = qr(geno)
-    index   = dqr$pivot[1:dqr$rank]
-    geno    = as.matrix(geno[, index])
-    pos     = pos[index]
+    cond <- colSums(geno) > 0
+    geno = geno[ ,cond]
+    pos  = pos[cond]
 
     ### Normalize the region to [0,1] if needed
-    if (max(pos) > 1){
+    if (max(pos) > 1)
+    {
       pos = (pos - min(pos)) / (max(pos) - min(pos))
     } else{ }
 
@@ -165,21 +174,24 @@ PedGFLMM_beta_smooth_only = function(ped, geno, covariate=NULL, pos, order, beta
   }
 
   #### CASE WITH MISSING GENO
-  if (sum(is.na(geno))>0){
-
+  if (sum(is.na(geno))>0)
+  {
     ### Normalize the region to [0,1] if needed
-    if (max(pos) > 1){
+    if (max(pos) > 1)
+    {
       pos = (pos - min(pos)) / (max(pos) - min(pos))
     } else{ }
 
     B  = eval.basis(pos, betabasis)
     UJ = NULL
-    for (i in 1:nrow(geno)){
-
+    for (i in 1:nrow(geno))
+    {
       idx = which(is.na(geno[i,]))
-      if (length(idx) == 0 || length(idx) == ncol(geno)){
+      if (length(idx) == 0 || length(idx) == ncol(geno))
+      {
         gi = geno[i,]; Bi  = B
-      } else {
+      } else
+      {
         gi = geno[i,-idx]; Bi = B[-idx,]
       }
 
@@ -190,7 +202,8 @@ PedGFLMM_beta_smooth_only = function(ped, geno, covariate=NULL, pos, order, beta
   }
 
   #### SET TRAIT TO NA IF WHOLE GENO IS MISSING, SO THAT "fitnull" BELOW WILL USE DATA WITHOUT SUBJECT WITH WHOLE GENO MISSING
-  if (sum(is.na(UJ))>0){
+  if (sum(is.na(UJ))>0)
+  {
     tmp1 = is.na(UJ)
     tmp2 = apply (tmp1, 1, sum)
     ped[tmp2>0,]$trait = NA
@@ -201,9 +214,12 @@ PedGFLMM_beta_smooth_only = function(ped, geno, covariate=NULL, pos, order, beta
   {
     dimcov = 0 # for Wald's test statistics
 
-    fit     = pedigreemm( trait ~ UJ + (1|ID), pedigree = list(ID = ped_list), data=ped, family = 'binomial')
-    fitnull = pedigreemm( trait ~    + (1|ID), pedigree = list(ID = ped_list), data=ped, family = 'binomial')
-
+    fit     = pedigreemm( trait ~ UJ + (1|ID), pedigree = list(ID = ped_list), data=ped,
+                          family = 'binomial',
+                          control = glmerControl(optimizer, optCtrl = list(maxfun = 100000)))
+    fitnull = pedigreemm( trait ~    + (1|ID), pedigree = list(ID = ped_list), data=ped,
+                          family = 'binomial',
+                          control = glmerControl(optimizer, optCtrl = list(maxfun = 100000)))
   } else
   {
     dimcov = ncol(covariate) - 2 # for Wald's test statistics
@@ -211,17 +227,22 @@ PedGFLMM_beta_smooth_only = function(ped, geno, covariate=NULL, pos, order, beta
     #covariate[is.na(covariate)] = 0
     covariate <- as.matrix(covariate)
 
-    fit     = pedigreemm( trait ~ covariate + UJ + (1|ID), pedigree = list(ID = ped_list), data=ped, family = 'binomial')
-    fitnull = pedigreemm( trait ~ covariate      + (1|ID), pedigree = list(ID = ped_list), data=ped, family = 'binomial')
+    fit     = pedigreemm( trait ~ covariate + UJ + (1|ID), pedigree = list(ID = ped_list), data=ped,
+                          family = 'binomial',
+                          control = glmerControl(optimizer, optCtrl = list(maxfun = 100000)))
+    fitnull = pedigreemm( trait ~ covariate      + (1|ID), pedigree = list(ID = ped_list),
+                          data=ped, family = 'binomial',
+                          control = glmerControl(optimizer, optCtrl = list(maxfun = 100000)))
   }
 
-  pval = list()
+  out = list()
   ### LRT
   nested_model_comparison = anova(fit,fitnull)
-  pval$LRT = nested_model_comparison[2,8]
+  out$LRT = nested_model_comparison[2,8]
 
   ### Wald test
-  if (Wald) {
+  if (Wald)
+  {
     coef_summary = summary(fit)$coefficients  # Sumary of coefficients
     coef         = coef_summary[,1]           # Obtain MLE of all parameters from the first column
     coef         = as.vector(coef)
@@ -233,17 +254,23 @@ PedGFLMM_beta_smooth_only = function(ped, geno, covariate=NULL, pos, order, beta
     covm_UJ = as.matrix(covm_UJ)
 
     Wald      = t(coef_UJ) %*% ginv(covm_UJ) %*% coef_UJ                # Wald's test statistic
-    pval$Wald = pchisq(as.numeric(Wald), df=ncol(UJ), lower.tail=FALSE) # df = number of restrictions i.e number of coef estimates for basis function ###
+    out$Wald = pchisq(as.numeric(Wald), df=ncol(UJ), lower.tail=FALSE) # df = number of restrictions i.e number of coef estimates for basis function ###
   }
 
-  pval
-  }
+  ###
+  out$nbetabasis = nbeta_basis
+  out$M_gao = ngeno_basis = ifelse(is.null(beta_basis), NB$M_gao, NA)
+
+  out
+}
+
+
 
 #' PedGFLMM package
 #'
 #' @description This package implements family-based additive generalized linear mixed
 #' models (GLMM) and generalized functional linear mixed models (GFLMM) for
-#' gene-based association testing of dichotomous traits (Jiang et al, 2019).
+#' gene-based association testing of dichotomous traits (Jiang et al, 2020).
 #'
 #' @author Yingda Jiang, Chi-Yang Chiu, Daniel E. Weeks, Ruzong Fan
 #' @docType package

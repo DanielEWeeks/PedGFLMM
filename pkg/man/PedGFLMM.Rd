@@ -8,7 +8,7 @@
 \description{
 This package implements family-based additive generalized linear mixed
 models (GLMM) and generalized functional linear mixed models (GFLMM) for
-gene-based association testing of dichotomous traits (Jiang et al, 2019).
+gene-based association testing of dichotomous traits (Jiang et al, 2020).
 }
 \author{
 Yingda Jiang, Chi-Yang Chiu, Daniel E. Weeks, Ruzong Fan

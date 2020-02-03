@@ -4,7 +4,7 @@
 \name{geno}
 \alias{geno}
 \title{geno}
-\format{An object of class \code{data.frame} with 228 rows and 278 columns.}
+\format{An object of class \code{data.frame} with 456 rows and 313 columns.}
 \usage{
 geno
 }

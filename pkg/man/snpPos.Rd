@@ -4,7 +4,7 @@
 \name{snpPos}
 \alias{snpPos}
 \title{snpPos}
-\format{An object of class \code{data.frame} with 276 rows and 3 columns.}
+\format{An object of class \code{data.frame} with 311 rows and 3 columns.}
 \usage{
 snpPos
 }

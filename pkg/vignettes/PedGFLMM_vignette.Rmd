@@ -27,12 +27,12 @@ library(knitr)
 opts_chunk$set(tidy.opts=list(width.cutoff=80),tidy=TRUE)
 ```
 
-Copyright 2019, Georgetown University and University of Pittsburgh.  All Rights Reserved. 
+Copyright 2020, Georgetown University and University of Pittsburgh.  All Rights Reserved. 
 
 # Overview
-This document describes our R package `PedGFLMM` which implements family-based additive generalized linear mixed models (GLMM) and generalized functional linear mixed models (GFLMM) for gene-based association testing of dichotomous traits (Jiang et al, 2019). Section 2 briefly describes the installation of the program. Section 3 describes the data formats. Section 4 explains how to run the program using one example. Section 5 offers explanation of the results and warnings to use the programs. Section 6 provides some suggestions and parameter choices for real data analysis.
+This document describes our R package `PedGFLMM` which implements family-based additive generalized linear mixed models (GLMM) and generalized functional linear mixed models (GFLMM) for gene-based association testing of dichotomous traits (Jiang et al, 2020). Section 2 briefly describes the installation of the program. Section 3 describes the data formats. Section 4 explains how to run the program using one example. Section 5 offers explanation of the results and warnings to use the programs. Section 6 provides some suggestions and parameter choices for real data analysis.
 
-The theoretical basis for this program is given in our research papers in Section 7 "References" below; the primary paper describing this work is Jiang et al (2019). Please cite the references if you use our program
+The theoretical basis for this program is given in our research papers in Section 7 "References" below; the primary paper describing this work is Jiang et al (2020). Please cite the references if you use our program
 in any published work. In case of suggestions and questions and/or problems, you can contact us via e-mail (rf740\@georgetown.edu).
 
 An HTML version of this vignette can be found at https://github.com/DanielEWeeks/PedGFLMM.
@@ -131,7 +131,7 @@ kable(head(cov), caption = "Table 4: The first 6 lines of the example covariate 
 
 # How to Run the Program
 
-There are three main functions in this package which implement the statistics described in Jiang et al (2019):
+There are three main functions in this package which implement the statistics described in Jiang et al (2020):
 
 1. `PedGLMM_additive_effect_model`
 2. `PedGFLMM_beta_smooth_only` 
@@ -160,7 +160,7 @@ ls()
 
 ## The PedGLMM_additive_effect_model function
 
-This function carries out a region-based association test using our additive generalized linear mixed model (GLMM), as described in Jiang et al (2019).  This statistics may not be powerful when the number of genetic variants is large.
+This function carries out a region-based association test using our additive generalized linear mixed model (GLMM), as described in Jiang et al (2020).  This statistics may not be powerful when the number of genetic variants is large.
 
 ```{r}
 add=PedGLMM_additive_effect_model(ped=Ped, geno = as.matrix(geno),covariate = as.matrix(cov))
@@ -176,23 +176,20 @@ As you can see from the examples above, the `PedGLMM_additive_effect_model` func
 
 ## The PedGFLMM_beta_smooth_only function
 
-This function carries out a region-based association test using our 'beta smooth only' generalized functional linear mixed model (GFLMM), where the genetic effect function is assumed to be continuous/smooth. For details, see Jiang et al (2019). 
+This function carries out a region-based association test using our 'beta smooth only' generalized functional linear mixed model (GFLMM), where the genetic effect function is assumed to be continuous/smooth. For details, see Jiang et al (2020). 
 
-The genetic effect function can be expanded using either B-spline or Fourier basis functions, and the order and number of basis functions need to be specified by the user.  For small sample size datasets, one may have problems of convergence. Then, one can use a smaller number of basis functions, e.g., `betabasis_Bsp` = 6, etc.
+The genetic effect function can be expanded using either B-spline or Fourier basis functions, and the order of the basis functions needs to be specified by the user.  For small sample size datasets, one may have problems of convergence. Then, one can use a smaller number of basis functions, e.g., `betabasis_Bsp` = 6, etc.
 
 ```{r}
-betabasis_Bsp = 10
-betabasis_Fsp = 11
-
 order  =   4
 
 bsmooth_bsp=PedGFLMM_beta_smooth_only(ped = Ped, geno = as.matrix(geno),
-   pos = snpPos$pos, order = order, beta_basis=betabasis_Bsp, covariate = as.matrix(cov),
+   pos = snpPos$pos, order = order, covariate = as.matrix(cov),
    base = "bspline")
 bsmooth_bsp
 
 bsmooth_fsp=PedGFLMM_beta_smooth_only(ped = Ped, geno = as.matrix(geno),
-   pos = snpPos$pos, order = order, beta_basis=betabasis_Fsp, covariate = as.matrix(cov),
+   pos = snpPos$pos, order = order, covariate = as.matrix(cov),
    base = "fspline")
 bsmooth_fsp
 ```
@@ -201,54 +198,42 @@ For the case without covariates,
 ```{r}
 
 bsmooth_bsp_no_cov=PedGFLMM_beta_smooth_only(ped = Ped, geno = as.matrix(geno),
-   pos = snpPos$pos, order = order, beta_basis=betabasis_Bsp, covariate = NULL, base = "bspline")
+   pos = snpPos$pos, order = order, covariate = NULL, base = "bspline")
 bsmooth_bsp_no_cov
 
 bsmooth_fsp_no_cov=PedGFLMM_beta_smooth_only(ped = Ped, geno = as.matrix(geno),
-   pos = snpPos$pos, order = order, beta_basis=betabasis_Fsp, covariate = NULL, base = "fspline")
+   pos = snpPos$pos, order = order, covariate = NULL, base = "fspline")
 bsmooth_fsp_no_cov
 ```
 
 ## The PedGFLMM_fixed_model function
 
-This function carries out a region-based association test using our generalized functional linear mixed model (GFLMM). For details, see Jiang et al (2019).
+This function carries out a region-based association test using our generalized functional linear mixed model (GFLMM). For details, see Jiang et al (2020).
 
-The genetic variant function (GVF) and the genetic effect function can be expanded using either B-spline or Fourier basis functions, and the order and number of basis functions need to be specified by the user.
+The genetic variant function (GVF) and the genetic effect function can be expanded using either B-spline or Fourier basis functions, and the order of the basis functions need to be specified by the user.
 
 ```{r}
-betabasis_Bsp = 10
-genobasis_Bsp = 10
-
-betabasis_Fsp = 11
-genobasis_Fsp = 11
 order  =   4
 
 fixed_bsp=PedGFLMM_fixed_model(ped = Ped, geno = as.matrix(geno), pos = snpPos$pos,
-    order = order, beta_basis=betabasis_Bsp, geno_basis = genobasis_Bsp,
-    covariate = as.matrix(cov), base = "bspline")
+    order = order, covariate = as.matrix(cov), base = "bspline")
 fixed_bsp
 
 fixed_fsp=PedGFLMM_fixed_model(ped = Ped, geno = as.matrix(geno), pos = snpPos$pos,
-    order = order, beta_basis=betabasis_Fsp, geno_basis = genobasis_Fsp,
-    covariate = as.matrix(cov), base = "fspline")
+    order = order,  covariate = as.matrix(cov), base = "fspline")
 fixed_fsp
 ```
 
 For the case without covariates,
 ```{r}
-betabasis_Bsp = 10
-genobasis_Bsp = 10
-
-betabasis_Fsp = 11
-genobasis_Fsp = 11
 order  =   4
 
 fixed_bsp_no_cov=PedGFLMM_fixed_model(ped = Ped, geno = as.matrix(geno), pos = snpPos$pos,
-    order = order, beta_basis=betabasis_Bsp, geno_basis = genobasis_Bsp, covariate = NULL, base = "bspline")
+    order = order, covariate = NULL, base = "bspline")
 fixed_bsp_no_cov
 
 fixed_fsp_no_cov=PedGFLMM_fixed_model(ped = Ped, geno = as.matrix(geno), pos = snpPos$pos,
-    order = order, beta_basis=betabasis_Fsp, geno_basis = genobasis_Fsp, covariate = NULL, base = "fspline")
+    order = order, covariate = NULL, base = "fspline")
 fixed_fsp_no_cov
 ```
 ## The Mega2PedGFLMM function
@@ -267,6 +252,7 @@ Mega2PedGFLMM(gs = 53:54)
 Mega2PedGFLMM(genes = "CEP104")
 ```
 
+The `Mega2PedGFLMM` function calls the `DOPedGFLMM` function for each gene region.  The `DOPedGFLMM` function takes the data that was read into the `ENV` environment from the "seqsimmGFLMM.db" Mega2R database and reformats as expected by the `PedGFLMM_beta_smooth_only` function.   
 
 # Explanation of the Results and Warnings 
 
@@ -306,13 +292,13 @@ Fan RZ, Wang YF, Mills JL, Wilson AF, Bailey-Wilson JE, and Xiong MM (2013) Func
 
 Fan RZ, Wang YF, Mills JL, Carter TC, Lobach I, Wilson AF, Bailey-Wilson JE, Weeks DE, and Xiong MM (2014) Generalized functional linear models for case-control association studies. _Genetic Epidemiology_ __38(7)__:622-637.
 
-Jiang YD, Chiu CY, Yan Q, Chen W, Gorin MB, Conley YP, Lakhal-Chaieb ML, Cook RJ, Amos CI, Wilson AF, Bailey-Wilson JE, McMahon FJ, Vazquez AI, Yuan A, Zhong XG, Xiong MM, Weeks DE, and Fan RZ (2019) Gene-based association testing of dichotomous traits with generalized linear mixed models for family data.
+Jiang YD, Chiu CY, Yan Q, Chen W, Gorin MB, Conley YP, Lakhal-Chaieb ML, Cook RJ, Amos CI, Wilson AF, Bailey-Wilson JE, McMahon FJ, Vazquez AI, Yuan A, Zhong XG, Xiong MM, Weeks DE, and Fan RZ (2020) Gene-based association testing of dichotomous traits with generalized linear mixed models for family data.
 
 Schaid DJ, McDonnell SK, Sinnwell JP, and Thibodeau SN (2013) Multiple genetic variant association testing by collapsing and kernel methods with pedigree or population structured data. _Genetic Epidemiology_ __37__:409-418.
 
 # Copyright Information
 
-Copyright 2019, Georgetown University and University of Pittsburgh.  All Rights Reserved. 
+Copyright 2020, Georgetown University and University of Pittsburgh.  All Rights Reserved. 
 
 
 

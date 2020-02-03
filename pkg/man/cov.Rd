@@ -4,7 +4,7 @@
 \name{cov}
 \alias{cov}
 \title{cov}
-\format{An object of class \code{data.frame} with 228 rows and 4 columns.}
+\format{An object of class \code{data.frame} with 456 rows and 4 columns.}
 \usage{
 cov
 }

@@ -4,8 +4,9 @@
 \alias{PedGFLMM_beta_smooth_only}
 \title{PedGFLMM_beta_smooth_only}
 \usage{
-PedGFLMM_beta_smooth_only(ped, geno, covariate = NULL, pos, order, beta_basis,
-  base = "bspline", Wald = FALSE)
+PedGFLMM_beta_smooth_only(ped, geno, covariate = NULL, pos, order,
+  beta_basis = NULL, base = "bspline", optimizer = "bobyqa",
+  Wald = FALSE)
 }
 \arguments{
 \item{ped}{A data frame containing the pedigree information with the following columns:
@@ -38,6 +39,8 @@ A list containing the following components:
 \describe{
   \item{LRT}{The p-value based on a likelihood ratio test}
   \item{Wald}{The p-value based on a Wald test, returned if 'Wald' is TRUE}
+  \item{nbetabasis}{The number of basis functions used to estimate the genetic effect function}
+  \item{M_gao}{The effective number of variants in the region, as computed by M_GAO function}
 }
 }
 \description{
@@ -46,27 +49,25 @@ Computes the PedGFLMM statistics under the beta smooth only model.
 \examples{
 data(exampleData)
 
-betabasis_Bsp = 10
-betabasis_Fsp = 11
 order  =   4
 
 bsmooth_bsp=PedGFLMM_beta_smooth_only(ped = Ped, geno = as.matrix(geno),
-   pos = snpPos$pos, order = order, beta_basis=betabasis_Bsp, covariate = as.matrix(cov),
+   pos = snpPos$pos, order = order, covariate = as.matrix(cov),
    base = "bspline")
 bsmooth_bsp
 
 bsmooth_fsp=PedGFLMM_beta_smooth_only(ped = Ped, geno = as.matrix(geno),
-   pos = snpPos$pos, order = order, beta_basis=betabasis_Fsp, covariate = as.matrix(cov),
+   pos = snpPos$pos, order = order, covariate = as.matrix(cov),
    base = "fspline")
 bsmooth_fsp
 
 bsmooth_bsp_no_cov=PedGFLMM_beta_smooth_only(ped = Ped, geno = as.matrix(geno),
-   pos = snpPos$pos, order = order, beta_basis=betabasis_Bsp, covariate = NULL,
+   pos = snpPos$pos, order = order, covariate = NULL,
    base = "bspline")
 bsmooth_bsp_no_cov
 
 bsmooth_fsp_no_cov=PedGFLMM_beta_smooth_only(ped = Ped, geno = as.matrix(geno),
-   pos = snpPos$pos, order = order, beta_basis=betabasis_Fsp, covariate = NULL,
+   pos = snpPos$pos, order = order, covariate = NULL,
    base = "fspline")
 bsmooth_fsp_no_cov
 }
@@ -77,7 +78,7 @@ Fan RZ, Wang YF, Mills JL, Wilson AF, Bailey-Wilson JE, and Xiong MM (2013) Func
 
 Fan RZ, Wang YF, Mills JL, Carter TC, Lobach I, Wilson AF, Bailey-Wilson JE, Weeks DE, and Xiong MM (2014) Generalized functional linear models for case-control association studies. Genetic Epidemiology 38 (7):622-637.
 
-Jiang YD, Chiu CY, Yan Q, Chen W, Gorin MB, Conley YP, Lakhal-Chaieb ML, Cook RJ, Amos CI, Wilson AF, Bailey-Wilson JE, McMahon FJ, Vazquez AI, Yuan A, Zhong XG, Xiong MM, Weeks DE, and Fan RZ (2019) Gene-based association testing of dichotomous traits with generalized linear mixed models for family data.
+Jiang YD, Chiu CY, Yan Q, Chen W, Gorin MB, Conley YP, Lakhal-Chaieb ML, Cook RJ, Amos CI, Wilson AF, Bailey-Wilson JE, McMahon FJ, Vazquez AI, Yuan A, Zhong XG, Xiong MM, Weeks DE, and Fan RZ (2020) Gene-based association testing of dichotomous traits with generalized linear mixed models for family data.
 
 Schaid DJ, McDonnell SK, Sinnwell JP, and Thibodeau SN (2013) Multiple genetic variant association testing by collapsing and kernel methods with pedigree or population structured data. Genetic Epidemiology 37:409-418.
 }

@@ -1,4 +1,4 @@
-# Copyright 2019, Georgetown University and University of Pittsburgh.  All Rights Reserved.
+# Copyright 2020, Georgetown University and University of Pittsburgh.  All Rights Reserved.
 #
 ### Updated by Chi-Yang on 03/19/2019: block distribution = "binomial", make the routine work for no covariate
 ### Written by Chi-Yang Chiu and Ruzong Fan, May 2016
@@ -38,6 +38,9 @@
 #' \describe{
 #'   \item{LRT}{The p-value based on a likelihood ratio test}
 #'   \item{Wald}{The p-value based on a Wald test, returned if 'Wald' is TRUE}
+#'   \item{nbetabasis}{The number of basis functions used to estimate the genetic effect function}
+#'   \item{ngenobasis}{The number of basis functions used to estimate the genetic variant functions}
+#'   \item{M_gao}{The effective number of variants in the region, as computed by M_GAO function}
 #' }
 #'
 #' @importFrom stats anova pchisq vcov
@@ -45,6 +48,7 @@
 #' @import MASS
 #' @import Matrix
 #' @import nlme
+#' @importFrom lme4 glmerControl
 #' @import pedigreemm
 #'
 #' @export
@@ -58,41 +62,36 @@
 #'
 #' Fan RZ, Wang YF, Mills JL, Carter TC, Lobach I, Wilson AF, Bailey-Wilson JE, Weeks DE, and Xiong MM (2014) Generalized functional linear models for case-control association studies. Genetic Epidemiology 38 (7):622-637.
 #'
-#' Jiang YD, Chiu CY, Yan Q, Chen W, Gorin MB, Conley YP, Lakhal-Chaieb ML, Cook RJ, Amos CI, Wilson AF, Bailey-Wilson JE, McMahon FJ, Vazquez AI, Yuan A, Zhong XG, Xiong MM, Weeks DE, and Fan RZ (2019) Gene-based association testing of dichotomous traits with generalized linear mixed models for family data.
+#' Jiang YD, Chiu CY, Yan Q, Chen W, Gorin MB, Conley YP, Lakhal-Chaieb ML, Cook RJ, Amos CI, Wilson AF, Bailey-Wilson JE, McMahon FJ, Vazquez AI, Yuan A, Zhong XG, Xiong MM, Weeks DE, and Fan RZ (2020) Gene-based association testing of dichotomous traits with generalized linear mixed models for family data.
 #'
 #' Schaid DJ, McDonnell SK, Sinnwell JP, and Thibodeau SN (2013) Multiple genetic variant association testing by collapsing and kernel methods with pedigree or population structured data. Genetic Epidemiology 37:409-418.
 #'
 #' @examples
 #' data(exampleData)
 #'
-#' betabasis_Bsp = 10
-#' genobasis_Bsp = 10
+#' # betabasis_Bsp = 10
+#' # genobasis_Bsp = 10
 #'
-#' betabasis_Fsp = 11
-#' genobasis_Fsp = 11
+#' # betabasis_Fsp = 11
+#' # genobasis_Fsp = 11
 #' order  =   4
 #'
 #' fixed_bsp=PedGFLMM_fixed_model(ped = Ped, geno = as.matrix(geno), pos = snpPos$pos,
-#'     order = order, beta_basis=betabasis_Bsp, geno_basis = genobasis_Bsp,
-#'     covariate = as.matrix(cov), base = "bspline")
+#'     order = order, covariate = as.matrix(cov), base = "bspline")
 #' fixed_bsp
 #'
 #' fixed_fsp=PedGFLMM_fixed_model(ped = Ped, geno = as.matrix(geno), pos = snpPos$pos,
-#'     order = order, beta_basis=betabasis_Fsp, geno_basis = genobasis_Fsp,
-#'     covariate = as.matrix(cov), base = "fspline")
+#'     order = order, covariate = as.matrix(cov), base = "fspline")
 #' fixed_fsp
 #'
 #' fixed_bsp_no_cov=PedGFLMM_fixed_model(ped = Ped, geno = as.matrix(geno), pos = snpPos$pos,
-#'     order = order, beta_basis=betabasis_Bsp, geno_basis = genobasis_Bsp,
-#'     covariate = NULL, base = "bspline")
+#'     order = order, covariate = NULL, base = "bspline")
 #' fixed_bsp_no_cov
 #'
 #' fixed_fsp_no_cov=PedGFLMM_fixed_model(ped = Ped, geno = as.matrix(geno), pos = snpPos$pos,
-#'     order = order, beta_basis=betabasis_Fsp, geno_basis = genobasis_Fsp,
-#'     covariate = NULL, base = "fspline")
+#'     order = order, covariate = NULL, base = "fspline")
 #' fixed_fsp_no_cov
-PedGFLMM_fixed_model = function(ped, geno, covariate=NULL, pos, order, beta_basis, geno_basis,
-                                base = "bspline", Wald = FALSE)
+PedGFLMM_fixed_model = function(ped, geno, covariate=NULL, pos, order, beta_basis=NULL, geno_basis=NULL, base = "bspline", optimizer= "bobyqa", Wald = FALSE)
 {
   ### GENERATING "pedigree_list" FOR USING R FUNCTION "pedigremm"
   dad = ped$father
@@ -135,31 +134,46 @@ PedGFLMM_fixed_model = function(ped, geno, covariate=NULL, pos, order, beta_basi
                    label = ped$ID)
   ped_list = pedigreemm:: pedigree(label = pede$label, sire = pede$sire, dam = pede$dam)
 
-  ### Create basis
-  if (base ==  "bspline"){
-    betabasis  = create.bspline.basis(norder = order, nbasis = beta_basis)
-    genobasis  = create.bspline.basis(norder = order, nbasis = geno_basis)
-  } else if (base == "fspline"){
-    betabasis  = create.fourier.basis(c(0,1), nbasis = beta_basis)
-    genobasis  = create.fourier.basis(c(0,1), nbasis = geno_basis)
-  }else { }
-
   ### EXTRACT GENO
   geno = geno[,-c(1:2), drop = FALSE]  # REMOVE THE FIRST TWO COLUMNS WHICH INCLUDE PEDIGREE ID and PERSON ID WITHIN FAMILY
+
+  ### number basis functions use dynamic rule
+  if(is.null(beta_basis) | is.null(geno_basis)) {NB = dRule(geno.only = geno)}
+
+  ### Create basis
+  if (base ==  "bspline")
+  {
+    nbeta_basis = ifelse(is.null(beta_basis), NB$betabasis_Bsp, beta_basis)
+    ngeno_basis = ifelse(is.null(geno_basis), NB$genobasis_Bsp, geno_basis)
+
+    betabasis  = create.bspline.basis(norder = order, nbasis = nbeta_basis)
+    genobasis  = create.bspline.basis(norder = order, nbasis = ngeno_basis)
+  } else if (base == "fspline"){
+    nbeta_basis = ifelse(is.null(beta_basis), NB$betabasis_Fsp, beta_basis)
+    ngeno_basis = ifelse(is.null(geno_basis), NB$genobasis_Fsp, geno_basis)
+
+    betabasis  = create.fourier.basis(c(0,1), nbasis = nbeta_basis)
+    genobasis  = create.fourier.basis(c(0,1), nbasis = ngeno_basis)
+  }else { }
 
   #### DEALING WITH MISSING GENO
   idx.na = is.na(geno)
 
   #### CASE WTIH NO MISSING GENO
-  if (sum(idx.na)==0){
+  if (sum(idx.na)==0)
+  {
+    #dqr     = qr(geno)
+    #index   = dqr$pivot[1:dqr$rank]
+    #geno    = as.matrix(geno[, index])
+    #pos     = pos[index]
 
-    dqr     = qr(geno)
-    index   = dqr$pivot[1:dqr$rank]
-    geno    = as.matrix(geno[, index])
-    pos     = pos[index]
+    cond <- colSums(geno) > 0
+    geno = geno[ ,cond]
+    pos  = pos[cond]
 
     ### Normalize the region to [0,1] if needed
-    if (max(pos) > 1) {
+    if (max(pos) > 1)
+    {
       pos = (pos - min(pos)) / (max(pos) - min(pos))
     } else{ }
 
@@ -172,10 +186,11 @@ PedGFLMM_fixed_model = function(ped, geno, covariate=NULL, pos, order, beta_basi
   }
 
   #### CASE WITH MISSING GENO
-  if (sum(idx.na)>0){
-
+  if (sum(idx.na)>0)
+  {
     ### Normalize the region to [0,1] if needed
-    if (max(pos) > 1) {
+    if (max(pos) > 1)
+    {
       pos = (pos - min(pos)) / (max(pos) - min(pos))
     } else{ }
 
@@ -183,19 +198,22 @@ PedGFLMM_fixed_model = function(ped, geno, covariate=NULL, pos, order, beta_basi
     J  = inprod(genobasis, betabasis)
     UJ = NULL
 
-    for (i in 1:nrow(geno)){
-
+    for (i in 1:nrow(geno))
+    {
       idx = which(is.na(geno[i,]))
-      if (length(idx)== ncol(geno)){
+      if (length(idx)== ncol(geno))
+      {
         tmp =  rep(NA, ncol(B))
-      }else if (length(idx)==  0){
+      }else if (length(idx)==  0)
+      {
         gi  = geno[i,]
         Bi  = B
         to_mul = ginv(t(Bi) %*% Bi) %*% t(Bi)
         gi_m   = matrix(gi,nrow = 1)
         U      = unlist(gi_m) %*% t( to_mul )
         tmp    =  U %*% J
-      }else{
+      }else
+      {
         gi  = geno[i,-idx]
         Bi  = B[-idx,]
         to_mul = ginv(t(Bi) %*% Bi) %*% t(Bi)
@@ -206,8 +224,10 @@ PedGFLMM_fixed_model = function(ped, geno, covariate=NULL, pos, order, beta_basi
       UJ = rbind(UJ,tmp)
     }
   }
+
   #### SET TRAIT TO NA IF WHOLE GENO IS MISSING, SO THAT "fitnull" BELOW WILL USE DATA WITHOUT SUBJECT WITH WHOLE GENO MISSING
-  if (sum(is.na(UJ))>0){
+  if (sum(is.na(UJ))>0)
+  {
     tmp1 = is.na(UJ)
     tmp2 = apply (tmp1, 1, sum)
     ped[tmp2>0,]$trait = NA
@@ -218,27 +238,34 @@ PedGFLMM_fixed_model = function(ped, geno, covariate=NULL, pos, order, beta_basi
   {
     dimcov = 0 # for Wald's test statistics
 
-    fit     = pedigreemm( trait ~ UJ + (1|ID), pedigree = list(ID = ped_list), data=ped, family = 'binomial')
-    fitnull = pedigreemm( trait ~    + (1|ID), pedigree = list(ID = ped_list), data=ped, family = 'binomial')
-
+    fit     = pedigreemm( trait ~ UJ + (1|ID), pedigree = list(ID = ped_list), data=ped,
+                          family = 'binomial',
+                          control = glmerControl(optimizer, optCtrl = list(maxfun = 100000)))
+    fitnull = pedigreemm( trait ~    + (1|ID), pedigree = list(ID = ped_list), data=ped,
+                          family = 'binomial',
+                          control = glmerControl(optimizer, optCtrl = list(maxfun = 100000)))
   } else
   {
     dimcov = ncol(covariate) - 2 # for Wald's test statistics
     covariate = covariate[,-c(1:2), drop = FALSE]  # REMOVE THE FIRST TWO COLUMNS WHICH INCLUDE PEDIGREE ID and PERSON ID WITHIN FAMILY
     #covariate[is.na(covariate)] = 0
-    covariate <- as.matrix(covariate)
 
-    fit     = pedigreemm( trait ~ covariate + UJ + (1|ID), pedigree = list(ID = ped_list), data=ped, family = 'binomial')
-    fitnull = pedigreemm( trait ~ covariate      + (1|ID), pedigree = list(ID = ped_list), data=ped, family = 'binomial')
+    fit     = pedigreemm( trait ~ covariate + UJ + (1|ID), pedigree = list(ID = ped_list),
+                          data=ped, family = 'binomial',
+                          control = glmerControl(optimizer, optCtrl = list(maxfun = 100000)))
+    fitnull = pedigreemm( trait ~ covariate      + (1|ID), pedigree = list(ID = ped_list), data=ped,
+                          family = 'binomial',
+                          control = glmerControl(optimizer, optCtrl = list(maxfun = 100000)))
   }
 
-  pval = list()
+  out = list()
   ### LRT
   nested_model_comparison = anova(fit,fitnull)
-  pval$LRT = nested_model_comparison[2,8]
+  out$LRT = nested_model_comparison[2,8]
 
   ### Wald test
-  if (Wald) {
+  if (Wald)
+  {
     coef_summary = summary(fit)$coefficients  # Sumary of coefficients
     coef         = coef_summary[,1]           # Obtain MLE of all parameters from the first column
     coef         = as.vector(coef)
@@ -250,9 +277,14 @@ PedGFLMM_fixed_model = function(ped, geno, covariate=NULL, pos, order, beta_basi
     covm_UJ = as.matrix(covm_UJ)
 
     Wald      = t(coef_UJ) %*% ginv(covm_UJ) %*% coef_UJ                # Wald's test statistic
-    pval$Wald = pchisq(as.numeric(Wald), df=ncol(UJ), lower.tail=FALSE) # df = number of restrictions i.e number of coef estimates for basis function ###
+    out$Wald = pchisq(as.numeric(Wald), df=ncol(UJ), lower.tail=FALSE) # df = number of restrictions i.e number of coef estimates for basis function ###
   }
 
-  pval
+  ###
+  out$nbetabasis = nbeta_basis
+  out$ngenobasis = ngeno_basis
+  out$M_gao = ngeno_basis = ifelse(is.null(beta_basis), NB$M_gao, NA)
+
+  out
 }
 

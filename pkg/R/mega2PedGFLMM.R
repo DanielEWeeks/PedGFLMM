@@ -1,4 +1,4 @@
-# Copyright 2019, Georgetown University and University of Pittsburgh.  All Rights Reserved.
+# Copyright 2020, Georgetown University and University of Pittsburgh.  All Rights Reserved.
 #
 # This code is dervied from the 'mega2pedgene.R' file from the
 #   Mega2R package.
