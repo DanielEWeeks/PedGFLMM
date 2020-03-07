@@ -3,25 +3,8 @@ PedGFLMM Vignette
 Yingda Jiang, Chi-Yang Chiu, Daniel E. Weeks, Ruzong Fan
 
 
--   [Overview](#overview)
--   [Installation](#installation)
--   [Data Format](#data-format)
-    -   [The pedigree file](#the-pedigree-file)
-    -   [The genotype file](#the-genotype-file)
-    -   [The map file](#the-map-file)
-    -   [The covariate file (optional)](#the-covariate-file-optional)
--   [How to Run the Program](#how-to-run-the-program)
-    -   [Load the example data](#load-the-example-data)
-    -   [The PedGLMM\_additive\_effect\_model function](#the-pedglmm_additive_effect_model-function)
-    -   [The PedGFLMM\_beta\_smooth\_only function](#the-pedgflmm_beta_smooth_only-function)
-    -   [The PedGFLMM\_fixed\_model function](#the-pedgflmm_fixed_model-function)
-    -   [The Mega2PedGFLMM function](#the-mega2pedgflmm-function)
--   [Explanation of the Results and Warnings](#explanation-of-the-results-and-warnings)
--   [Suggestions and Parameters for Real Data Analysis](#suggestions-and-parameters-for-real-data-analysis)
--   [References](#references)
--   [Copyright Information](#copyright-information)
-
-Copyright 2020, Georgetown University and University of Pittsburgh. All Rights Reserved.
+Copyright 2020, Georgetown University and University of Pittsburgh. All
+Rights Reserved.
 
 # Overview
 
@@ -247,12 +230,11 @@ add_no_cov = PedGLMM_additive_effect_model(ped = Ped, geno = as.matrix(geno), co
 
     ## fixed-effect model matrix is rank deficient so dropping 39 columns / coefficients
 
-    ## Warning in checkConv(attr(opt, "derivs"), opt$par, ctrl =
-    ## control$checkConv, : unable to evaluate scaled gradient
+    ## Warning in checkConv(attr(opt, "derivs"), opt$par, ctrl = control$checkConv, :
+    ## unable to evaluate scaled gradient
 
-    ## Warning in checkConv(attr(opt, "derivs"), opt$par, ctrl =
-    ## control$checkConv, : Model failed to converge: degenerate Hessian with 3
-    ## negative eigenvalues
+    ## Warning in checkConv(attr(opt, "derivs"), opt$par, ctrl = control$checkConv, :
+    ## Model failed to converge: degenerate Hessian with 3 negative eigenvalues
 
 ``` r
 add_no_cov
@@ -272,13 +254,17 @@ instead.
 This function carries out a region-based association test using our
 ‘beta smooth only’ generalized functional linear mixed model (GFLMM),
 where the genetic effect function is assumed to be continuous/smooth.
-For details, see Jiang et al (2020).
+The number of basis functions used is determined by a dynamic rule as
+described in Jiang et al (2020). To see the function that defines this
+dynamic rule, look at the source code for the `dRule` function by typing
+`dRule` at the R prompt. This dynamic rule tries to use an appropriate
+number of basis functions as a function of the effective number of
+indpendent variants in the region; this ‘effective number’ is determined
+by an algorithm developed by Gao et al (2008).
 
 The genetic effect function can be expanded using either B-spline or
 Fourier basis functions, and the order of the basis functions needs to
-be specified by the user. For small sample size datasets, one may have
-problems of convergence. Then, one can use a smaller number of basis
-functions, e.g., `betabasis_Bsp` = 6, etc.
+be specified by the user.
 
 ``` r
 order = 4
@@ -509,43 +495,11 @@ gene region. The `DOPedGFLMM` function takes the data that was read into
 the `ENV` environment from the “seqsimmGFLMM.db” Mega2R database and
 reformats as expected by the `PedGFLMM_beta_smooth_only` function.
 
-# Explanation of the Results and Warnings
+# Explanation of the Results
 
 As shown above, our program outputs the \(p\)-value based on likelihood
 ratio test (LRT). The LRT is conservative and has good power
 performance.
-
-# Suggestions and Parameters for Real Data Analysis
-
-In this documentation, we present three R functions to perform
-gene-based association analysis of dichotomous traits using family data.
-The two PedGFLMM functions, ‘PedGFLMM\_fixed\_model.R’ and
-‘PedGFLMM\_beta\_smooth\_only.R’, usually provide very similar
-results. In practice, one may use one of them for data analysis. We
-suggest to use PedGFLMM\_fixed\_model by either B-spline or Fourier
-spline basis functions and report the \(p\)-values of LRT. If the number
-of SNPs is not very big, we suggest the following parameters for a data
-analysis:
-
-First, set `order = 4`.
-
-For a B-spline basis, set `beta_basis = 10` and `geno_basis = 10`.
-
-For a Fourier spline basis, set `beta_basis = 11` and `geno_basis = 11`.
-
-If the number of SNPs is large, one should try `order = 4` and:
-
-For a B-spline basis, set `beta_basis = 15` and `geno_basis = 15`.
-
-For a Fourier spline basis, set `beta_basis = 16` and `geno_basis = 16`.
-
-It may be necessary to set `beta_basis` and `geno_basis` to even larger
-numbers. The point is that the parameters should be large enough to
-sufficiently expand information of the genetic data, but can not be too
-large to decrease the power.
-
-Note if an even number is specified for the basis of the Fourier spline
-basis function, it is rounded up to the nearest odd integer.
 
 # References
 
@@ -571,6 +525,10 @@ Fan RZ, Wang YF, Mills JL, Carter TC, Lobach I, Wilson AF, Bailey-Wilson
 JE, Weeks DE, and Xiong MM (2014) Generalized functional linear models
 for case-control association studies. *Genetic Epidemiology*
 **38(7)**:622-637.
+
+Gao X, Starmer J, and Martin ER (2008) A multiple testing correction
+method for genetic association studies using correlated single
+nucleotide polymorphisms. *Genetic Epidemiology* **32(4)**:361–369.
 
 Jiang YD, Chiu CY, Yan Q, Chen W, Gorin MB, Conley YP, Lakhal-Chaieb ML,
 Cook RJ, Amos CI, Wilson AF, Bailey-Wilson JE, McMahon FJ, Vazquez AI,
