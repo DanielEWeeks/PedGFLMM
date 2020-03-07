@@ -27,6 +27,7 @@
 #' }
 #' @param geno A data frame containing the genotype information.  This is a matrix with genotypes for subjects (rows) at each variant position (columns). The first two columns are required to be named “ped” and “person”, which are used to match subjects to their data in the pedigree data.frame. The genotypes are coded as 0, 1, 2 for autosomal markers (typically a count of the number of the minor alleles).
 #' @param covariate A data frame containing the covariate information. The first two columns are required to be named “ped” and “person”, which are used to match subjects to their data in the pedigree data frame. This is optional and the default "covariate = NULL" is for the case when the covariate matrix is not provided.
+#' @param optimizer Optimizer to use (default = "bobyqa").
 #' @param Wald If Wald is set to true, return the Wald p-value in addition to the LRT p-value (Default: Wald = FALSE).
 #'
 #' @return A list containing the following components:

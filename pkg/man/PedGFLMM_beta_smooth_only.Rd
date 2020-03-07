@@ -4,9 +4,17 @@
 \alias{PedGFLMM_beta_smooth_only}
 \title{PedGFLMM_beta_smooth_only}
 \usage{
-PedGFLMM_beta_smooth_only(ped, geno, covariate = NULL, pos, order,
-  beta_basis = NULL, base = "bspline", optimizer = "bobyqa",
-  Wald = FALSE)
+PedGFLMM_beta_smooth_only(
+  ped,
+  geno,
+  covariate = NULL,
+  pos,
+  order,
+  beta_basis = NULL,
+  base = "bspline",
+  optimizer = "bobyqa",
+  Wald = FALSE
+)
 }
 \arguments{
 \item{ped}{A data frame containing the pedigree information with the following columns:
@@ -31,6 +39,8 @@ PedGFLMM_beta_smooth_only(ped, geno, covariate = NULL, pos, order,
 \item{beta_basis}{The number of basis functions used to estimate the genetic effect function.}
 
 \item{base}{Can be either 'bspline' or 'fspline'.}
+
+\item{optimizer}{Optimizer to use (default = "bobyqa").}
 
 \item{Wald}{If Wald is set to true, return the Wald p-value in addition to the LRT p-value (Default: Wald = FALSE).}
 }

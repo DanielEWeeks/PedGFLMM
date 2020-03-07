@@ -59,6 +59,7 @@ Meff_PCA <- function(eigenValues, percentCut){
 
 #============================================================================
 # infer the cutoff => Meff
+#' @importFrom stats cor
 inferCutoff <- function(dt_My){
   CLD <- cor(dt_My)
   eigen_My <- eigen(CLD)

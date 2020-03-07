@@ -4,9 +4,18 @@
 \alias{PedGFLMM_fixed_model}
 \title{PedGFLMM_fixed_model}
 \usage{
-PedGFLMM_fixed_model(ped, geno, covariate = NULL, pos, order,
-  beta_basis = NULL, geno_basis = NULL, base = "bspline",
-  optimizer = "bobyqa", Wald = FALSE)
+PedGFLMM_fixed_model(
+  ped,
+  geno,
+  covariate = NULL,
+  pos,
+  order,
+  beta_basis = NULL,
+  geno_basis = NULL,
+  base = "bspline",
+  optimizer = "bobyqa",
+  Wald = FALSE
+)
 }
 \arguments{
 \item{ped}{A data frame containing the pedigree information with the following columns:
@@ -33,6 +42,8 @@ PedGFLMM_fixed_model(ped, geno, covariate = NULL, pos, order,
 \item{geno_basis}{The number of basis functions used to estimate the genetic variant functions.}
 
 \item{base}{Can be either 'bspline' or 'fspline'.}
+
+\item{optimizer}{Optimizer to use (default = "bobyqa").}
 
 \item{Wald}{If Wald is set to true, return the Wald p-value in addition to the LRT p-value (Default: Wald = FALSE).}
 }

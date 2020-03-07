@@ -32,6 +32,7 @@
 #' @param beta_basis The number of basis functions used to estimate the genetic effect function.
 #' @param geno_basis The number of basis functions used to estimate the genetic variant functions.
 #' @param base Can be either 'bspline' or 'fspline'.
+#' @param optimizer Optimizer to use (default = "bobyqa").
 #' @param Wald If Wald is set to true, return the Wald p-value in addition to the LRT p-value (Default: Wald = FALSE).
 #'
 #' @return A list containing the following components:

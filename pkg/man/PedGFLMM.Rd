@@ -3,7 +3,6 @@
 \docType{package}
 \name{PedGFLMM}
 \alias{PedGFLMM}
-\alias{PedGFLMM-package}
 \title{PedGFLMM package}
 \description{
 This package implements family-based additive generalized linear mixed
